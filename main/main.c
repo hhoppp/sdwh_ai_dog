@@ -3,6 +3,7 @@
 #include "freertos/task.h"
 #include "sh1106.h"
 #include "mic_inmp441.h"
+#include "wifi_module.h"
 
 
 
@@ -26,6 +27,30 @@ void app_main(void) {
         return;
     }
     printf("mic_inmp441 initialization successfully\n");
+
+    // 初始化 WiFi 模块
+    ESP_ERROR_CHECK(wifi_module_init());
+
+    // // 扫描 WiFi 列表
+    ESP_ERROR_CHECK(wifi_module_scan_ap());
+
+    // 连接指定 WiFi
+    ESP_ERROR_CHECK(wifi_module_connect("1111", "00000000"));
+
+    // 等待连接成功（实际项目中可通过事件或超时判断）
+    vTaskDelay(pdMS_TO_TICKS(5000));
+
+    // 获取 IP 地址
+    char ip_str[16] = {0};
+    ESP_ERROR_CHECK(wifi_module_get_ip(ip_str, sizeof(ip_str)));
+    printf("Device IP: %s\n", ip_str);
+
+    // 获取信号强度
+    int8_t rssi = wifi_module_get_rssi();
+    printf("WiFi RSSI: %d dBm\n", rssi);
+
+    // 后续可根据需求调用断开连接等函数
+    // ESP_ERROR_CHECK(wifi_module_disconnect());
 
     // 【调用库接口创建读取任务】
     esp_err_t ret = mic_inmp441_create_read_task(mic, 4096, 5);
