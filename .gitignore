@@ -1,0 +1,4 @@
+# 忽略VS Code配置目录
+.vscode/
+
+build/
